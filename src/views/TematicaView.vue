@@ -15,17 +15,17 @@
     <!-- Contenedor de acciones y formulario -->
     <div :class="['actions-container', { 'enabled': isSectionEnabled }]">
       <div class="button-container" style="display: flex; gap: 1rem;">
-        <button @click="startCreating" class="btn green" :disabled="formVisible || isProcessing" style="flex: 2;">Crear
-          Nuevo</button>
+        <button @click="startCreating" class="btn green" :disabled="formVisible || isProcessing"
+          style="flex: 2;">Crear</button>
         <button @click="startEditing" class="btn gray" :disabled="!selectedTematica || formVisible || isProcessing"
           style="flex: 1;">Modificar</button>
-        <button @click="confirmDelete" class="btn gray" :disabled="!selectedTematica || formVisible || isProcessing"
+        <button @click="checkIfDeletable" class="btn gray" :disabled="!selectedTematica || formVisible || isProcessing"
           style="flex: 1;">Borrar</button>
       </div>
 
       <!-- Formulario dinámico -->
       <div v-if="formVisible" class="form-container">
-        <h3>{{ editing ? 'Modificar Temática' : 'Crear Nueva Temática' }}</h3>
+        <h3>{{ editing ? 'Modificando' : 'Creando' }}</h3>
         <form @submit.prevent="handleSubmit">
           <label>
             Nombre:
@@ -48,13 +48,14 @@
               <input type="checkbox" v-model="form.activo" />
               <span v-if="errors.activo">{{ errors.activo }}</span>
             </label>
-            <label style="flex: 3;">
+            <label style="flex: 2;">
               Fecha de Creación:
               <input type="date" v-model="form.fechaCreacion" required />
               <span v-if="errors.fechaCreacion">{{ errors.fechaCreacion }}</span>
             </label>
           </div>
-          <button type="submit" class="btn submit">{{ editing ? 'Guardar Cambios' : 'Crear' }}</button>
+          <button type="submit" class="btn submit" >{{ editing ? 'Modificar' : 'Crear'
+            }}</button>
           <button type="button" @click="cancelForm" class="btn cancel">Cancelar</button>
         </form>
       </div>
@@ -63,8 +64,9 @@
     <!-- Modal de confirmación de borrado -->
     <div v-if="showDeleteModal" class="modal-backdrop">
       <div class="modal">
-        <p>¿Estás seguro de que deseas borrar esta temática?</p>
-        <button @click="deleteTematica" class="btn red">Confirmar</button>
+        <p v-if="deleteError">{{ deleteError }}</p>
+        <p v-else>¿Estás seguro de que deseas borrar esta temática?</p>
+        <button v-if="!deleteError" @click="deleteTematica" class="btn red">Confirmar</button>
         <button @click="cancelDelete" class="btn cancel">Cancelar</button>
       </div>
     </div>
@@ -86,6 +88,7 @@ export default {
     const formVisible = ref(false);
     const isProcessing = ref(false);
     const showDeleteModal = ref(false);
+    const deleteError = ref(null);
     const editing = ref(false);
     const form = ref({
       nombre: '',
@@ -153,7 +156,7 @@ export default {
       try {
         if (editing.value) {
           // Actualizar existente
-          await axios.put(`/api/tematicas/${selectedTematica.value.id}`, form.value);
+          await axios.post(`/api/tematicas`, form.value);
           const index = tematicas.value.findIndex(t => t.id === selectedTematica.value.id);
           tematicas.value[index] = { ...form.value, id: selectedTematica.value.id };
           showToast('Temática actualizada exitosamente.');
@@ -203,9 +206,31 @@ export default {
       }
     };
 
-    // Borrar
-    const confirmDelete = () => {
-      showDeleteModal.value = true;
+    // Comprobar si se puede borrar
+    const checkIfDeletable = async () => {
+      try {
+        // Mensaje de depuración para verificar que la función se está ejecutando
+        console.log(`Checking if tematica with ID ${selectedTematica.value.id} can be deleted...`);
+
+        // Realizar la consulta a la API para verificar si hay videos asociados con la temática
+        const response = await axios.get(`/api/videos?tematicaId=${selectedTematica.value.id}`);
+
+        // Mensaje de depuración para verificar los datos de la respuesta
+        console.log('Response data:', response.data);
+
+        // Verificar si hay videos asociados con la temática
+        if (response.data.length > 0) {
+          deleteError.value = 'No se puede borrar la temática porque tiene vídeos asociados.';
+        } else {
+          deleteError.value = null;
+        }
+
+        // Mostrar el modal de confirmación de borrado
+        showDeleteModal.value = true;
+      } catch (error) {
+        // Manejar cualquier error que ocurra durante la consulta
+        console.error('Error al comprobar si se puede borrar la temática:', error);
+      }
     };
 
     // Confirmar borrado
@@ -257,13 +282,14 @@ export default {
       formVisible,
       isProcessing,
       showDeleteModal,
+      deleteError,
       editing,
       form,
       errors,
       selectTematica,
       startCreating,
       startEditing,
-      confirmDelete,
+      checkIfDeletable,
       deleteTematica,
       cancelForm,
       cancelDelete,
@@ -279,7 +305,7 @@ export default {
 <style scoped>
 /* Contenedor principal */
 .main-container {
-  margin-top: 75px;
+  margin-top: 70px;
   display: flex;
   height: 500px;
   font-family: 'Arial', sans-serif;
@@ -298,12 +324,14 @@ export default {
 
 /* Estilo para la lista de temáticas en estado deshabilitado */
 .tematica-list.disabled {
-  opacity: 0.5; /* Aplica un efecto visual para mostrar que está deshabilitada */
+  opacity: 0.5;
+  /* Aplica un efecto visual para mostrar que está deshabilitada */
 }
 
 /* Estilo para el cursor prohibido en la lista de temáticas cuando el formulario está visible */
 .tematica-list.disabled li {
-  cursor: not-allowed; /* Cambia el cursor a puntero prohibido */
+  cursor: not-allowed;
+  /* Cambia el cursor a puntero prohibido */
 }
 
 /* Estilo para la lista de temáticas */
@@ -347,6 +375,7 @@ li[disabled] {
   display: flex;
   justify-content: space-between;
   margin-bottom: 1rem;
+  width: 100%; /* Asegúrate de que el contenedor ocupe el ancho completo */
 }
 
 .btn {
@@ -355,6 +384,8 @@ li[disabled] {
   cursor: pointer;
   border-radius: 5px;
   color: white;
+  flex-grow: 1; /* Permite que los botones se expandan para llenar el espacio disponible */
+  margin: 0 0.5rem; /* Añade un margen entre los botones */
 }
 
 .green {
@@ -438,6 +469,10 @@ form .btn {
   width: 100px;
 }
 
+.number {
+  justify-content: right;
+}
+
 /* Toast */
 .toast {
   position: fixed;
@@ -454,7 +489,17 @@ form .btn {
 }
 
 button:disabled {
-  opacity: 0.6;
+  opacity: 0.4;
   cursor: not-allowed;
+}
+
+input[type="date"] {
+  background-color: white;
+  text-align: left;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 0.5rem;
+  width: 100%;
+  margin-bottom: 1rem;
 }
 </style>
