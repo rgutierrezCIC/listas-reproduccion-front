@@ -14,3 +14,5 @@ Trabajo final e individual del Bootcamp de CIC
 - Tooltips
 
 - Los botones de cancelar recargan la página
+
+- duración en minutos
