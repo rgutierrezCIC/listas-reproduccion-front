@@ -18,12 +18,12 @@
     <!-- Contenedor de acciones y formulario -->
     <div :class="['actions-container', { 'enabled': isSectionEnabled }]">
       <div class="button-container" style="display: flex; gap: 1rem;">
-        <button @click="startCreating" class="btn green" :disabled="formVisible || isProcessing"
-          style="flex: 2;">Crear</button>
+        <button @click="startCreating" class="btn green" :disabled="formVisible || isProcessing" style="flex: 2;"
+          v-tooltip="'Crear un nuevo video'">Crear</button>
         <button @click="startEditing" class="btn gray" :disabled="!selectedVideo || formVisible || isProcessing"
-          style="flex: 1;">Modificar</button>
+          style="flex: 1;" v-tooltip="'Modificar el video seleccionado'">Modificar</button>
         <button @click="confirmDelete" class="btn gray" :disabled="!selectedVideo || formVisible || isProcessing"
-          style="flex: 1;">Borrar</button>
+          style="flex: 1;" v-tooltip="'Eliminar el video seleccionado'">Borrar</button>
       </div>
 
       <!-- Formulario dinámico -->
@@ -44,34 +44,46 @@
             <label style="flex: 1;">
               Temática:
               <select v-model="form.tematicaId" required class="form-input-left">
-                <option v-for="tematica in tematicas" :key="tematica.id" :value="tematica.id">{{ tematica.nombre }}</option>
+                <option v-for="tematica in tematicas" :key="tematica.id" :value="tematica.id">
+                  {{ tematica.nombre }}
+                </option>
               </select>
               <span v-if="errors.tematicaId">{{ errors.tematicaId }}</span>
             </label>
           </div>
-          <div class="form-row">
-            <label style="flex: 1;">
-              Duración:
+          <div class="form-row2">
+            <label style="flex: 6;">
+              Duración (m):
               <input v-model.number="form.duracion" type="number" required min="1" class="form-input-right" />
               <span v-if="errors.duracion">{{ errors.duracion }}</span>
             </label>
             <label style="flex: 1;">
+            </label>
+            <label style="flex: 4;">
               Calidad:
               <select v-model="form.calidad" required class="form-input-right">
-                <option v-for="option in calidadOptions" :key="option" :value="option">{{ option }}</option>
+                <option v-for="calidad in calidadOptions" :key="calidad" :value="calidad">
+                  {{ calidad }}
+                </option>
               </select>
               <span v-if="errors.calidad">{{ errors.calidad }}</span>
             </label>
             <label style="flex: 1;">
+            </label>
+            <label style="flex: 4;">
               Clasificación:
               <select v-model="form.clasificacion" required class="form-input-right">
-                <option v-for="option in clasificacionOptions" :key="option" :value="option">{{ option }}</option>
+                <option v-for="clasificacion in clasificacionOptions" :key="clasificacion" :value="clasificacion">
+                  {{ clasificacion }}
+                </option>
               </select>
               <span v-if="errors.clasificacion">{{ errors.clasificacion }}</span>
             </label>
-            <label style="flex: 2;">
-              Creación:
-              <input type="date" v-model="form.fechaCreacion" required />
+            <label style="flex: 1;">
+            </label>
+            <label style="flex: 4;">
+              Fecha de Creación:
+              <input v-model="form.fechaCreacion" type="date" required />
               <span v-if="errors.fechaCreacion">{{ errors.fechaCreacion }}</span>
             </label>
           </div>
@@ -98,6 +110,7 @@
 <script>
 import { ref, onMounted, toRaw } from 'vue';
 import axios from 'axios';
+
 
 export default {
   name: 'VideoView',
@@ -220,13 +233,13 @@ export default {
           console.log('Respuesta del servidor (actualizar):', response.data);
           const index = videos.value.findIndex(v => v.id === selectedVideo.value.id);
           videos.value[index] = { ...formData, id: selectedVideo.value.id };
-          showToast('Video modificado exitosamente.');
+          showToast(`Video "${formData.titulo}" modificado exitosamente.`);
         } else {
           // Crear nuevo
           const response = await axios.post('/api/videos', formData);
           console.log('Respuesta del servidor (crear):', response.data);
           videos.value.push(response.data);
-          showToast('Video creado exitosamente.');
+          showToast(`Video "${formData.titulo}" creado exitosamente.`);
         }
         cancelForm();
       } catch (error) {
@@ -263,8 +276,7 @@ export default {
       if (selectedVideo.value) {
         form.value = {
           ...selectedVideo.value,
-          // calidad: selectedVideo.value.calidad,
-          // tematicaId: selectedVideo.value.tematica?.id
+          tematicaId: selectedVideo.value.tematica?.id
         };
         formVisible.value = true;
         editing.value = true;
@@ -299,6 +311,7 @@ export default {
       formVisible.value = false;
       isProcessing.value = false;
       resetForm();
+      reloadPage();
     };
 
     // Cancelar el modal de borrado
@@ -326,6 +339,11 @@ export default {
       await fetchTematicas();
     });
 
+    // Método para recargar la página
+    const reloadPage = () => {
+      location.reload();
+    };
+
     return {
       videos,
       tematicas,
@@ -348,7 +366,8 @@ export default {
       handleSubmit,
       showToast,
       toastVisible,
-      toastMessage
+      toastMessage,
+      reloadPage
     };
   }
 };
@@ -359,7 +378,7 @@ export default {
 .main-container {
   margin-top: 70px;
   display: flex;
-  height: 500px;
+  height: 600px;
   font-family: 'Arial', sans-serif;
   background-color: #f0f0f0;
 }
@@ -423,7 +442,6 @@ li[disabled] {
   justify-content: space-between;
   margin-bottom: 1rem;
   width: 100%;
-  /* Asegúrate de que el contenedor ocupe el ancho completo */
 }
 
 .btn {
@@ -433,9 +451,7 @@ li[disabled] {
   border-radius: 5px;
   color: white;
   flex-grow: 1;
-  /* Permite que los botones se expandan para llenar el espacio disponible */
   margin: 0 0.5rem;
-  /* Añade un margen entre los botones */
 }
 
 .green {
@@ -443,7 +459,7 @@ li[disabled] {
 }
 
 .gray {
-  background-color: #6c757d;
+  background-color: #5d96c9;
 }
 
 .red {
@@ -455,7 +471,7 @@ li[disabled] {
 }
 
 .cancel {
-  background-color: #6c757d;
+  background-color: #5d96c9;
 }
 
 form {
@@ -485,181 +501,8 @@ select {
   gap: 1rem;
 }
 
-/* Añadir margen inferior a los botones del formulario */
-form .btn {
-  margin-bottom: 1rem;
-}
-
-/* Modal */
-.modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal {
-  background-color: white;
-  padding: 2rem;
-  border-radius: 10px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  width: 300px;
-  text-align: center;
-}
-
-.modal p {
-  margin-bottom: 1rem;
-}
-
-.modal .btn {
-  margin: 0.5rem;
-  width: 100px;
-}
-
-/* Toast */
-.toast {
-  position: fixed;
-  top: 10px;
-  left: 10px;
-  background-color: #28a745;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 5px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
-}
-
-button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-</style>
-
-<style scoped>
-/* Contenedor principal */
-.main-container {
-  margin-top: 70px;
-  display: flex;
-  height: 500px;
-  font-family: 'Arial', sans-serif;
-  background-color: #f0f0f0;
-}
-
-/* Lista de videos - siempre ocupa la mitad de la pantalla */
-.video-list {
-  width: 50%;
-  overflow-y: auto;
-  padding: 1rem;
-  background-color: #f0f0f0;
-}
-
-/* Estilo para la lista de videos en estado deshabilitado */
-.video-list.disabled {
-  opacity: 0.5;
-}
-
-/* Estilo para el cursor prohibido en la lista de videos cuando el formulario está visible */
-.video-list.disabled li {
-  cursor: not-allowed;
-}
-
-/* Estilo para la lista de videos */
-ul {
-  list-style-type: none;
-  padding-left: 0;
-}
-
-li {
-  cursor: pointer;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  background-color: #f9f9f9;
-}
-
-li.selected {
-  background-color: #e0e0e0;
-}
-
-li[disabled] {
-  pointer-events: none;
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* Contenedor de acciones */
-.actions-container {
-  width: 50%;
-  background-color: #f0f0f0;
-  display: flex;
-  flex-direction: column;
-  padding: 1rem;
-  opacity: 1;
-}
-
-/* Botones */
-.button-container {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-}
-
-.btn {
-  padding: 0.5rem 1rem;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-  color: white;
-}
-
-.green {
-  background-color: #28a745;
-}
-
-.gray {
-  background-color: #6c757d;
-}
-
-.red {
-  background-color: #dc3545;
-}
-
-.submit {
-  background-color: #28a745;
-}
-
-.cancel {
-  background-color: #6c757d;
-}
-
-form {
-  display: flex;
-  flex-direction: column;
-}
-
-label {
-  margin-bottom: 0.5rem;
-}
-
-input,
-textarea,
-select {
-  margin-bottom: 1rem;
-  padding: 0.5rem;
-  border-radius: 5px;
-  border: 1px solid #ddd;
-  width: 100%;
-  background-color: #fff;
-}
-
-/* Formulario fila */
-.form-row {
+/* Formulario fila2 */
+.form-row2 {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
@@ -670,185 +513,11 @@ form .btn {
   margin-bottom: 1rem;
 }
 
-/* Modal */
-.modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal {
-  background-color: white;
-  padding: 2rem;
-  border-radius: 10px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  width: 300px;
-  text-align: center;
-}
-
-.modal p {
-  margin-bottom: 1rem;
-}
-
-.modal .btn {
-  margin: 0.5rem;
-  width: 100px;
-}
-
-/* Toast */
-.toast {
-  position: fixed;
-  top: 10px;
-  left: 10px;
-  background-color: #28a745;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 5px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
-}
-
-button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-</style>
-
-<style scoped>
-/* Contenedor principal */
-.main-container {
-  margin-top: 70px;
-  display: flex;
-  height: 500px;
-  font-family: 'Arial', sans-serif;
-  background-color: #f0f0f0;
-}
-
-/* Lista de videos - siempre ocupa la mitad de la pantalla */
-.video-list {
-  width: 50%;
-  overflow-y: auto;
-  padding: 1rem;
-  background-color: #f0f0f0;
-}
-
-/* Estilo para la lista de videos en estado deshabilitado */
-.video-list.disabled {
-  opacity: 0.5;
-}
-
-/* Estilo para el cursor prohibido en la lista de videos cuando el formulario está visible */
-.video-list.disabled li {
-  cursor: not-allowed;
-}
-
-/* Estilo para la lista de videos */
-ul {
-  list-style-type: none;
-  padding-left: 0;
-}
-
-li {
-  cursor: pointer;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  background-color: #f9f9f9;
-}
-
-li.selected {
-  background-color: #e0e0e0;
-}
-
-li[disabled] {
-  pointer-events: none;
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* Contenedor de acciones */
-.actions-container {
-  width: 50%;
-  background-color: #f0f0f0;
-  display: flex;
-  flex-direction: column;
-  padding: 1rem;
-  opacity: 1;
-}
-
-/* Botones */
-.button-container {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-}
-
-.btn {
-  padding: 0.5rem 1rem;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-  color: white;
-}
-
-.green {
-  background-color: #28a745;
-}
-
-.gray {
-  background-color: #6c757d;
-}
-
-.red {
-  background-color: #dc3545;
-}
-
-.submit {
-  background-color: #28a745;
-}
-
-.cancel {
-  background-color: #6c757d;
-}
-
-form {
-  display: flex;
-  flex-direction: column;
-}
-
-label {
-  margin-bottom: 0.5rem;
-}
-
-input,
-textarea,
-select {
-  margin-bottom: 1rem;
-  padding: 0.5rem;
-  border-radius: 5px;
-  border: 1px solid #ddd;
-  width: 100%;
+.form-input-right {
   text-align: right;
-  background-color: #fff;
-}
-
-/* Formulario fila */
-.form-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-/* Añadir margen inferior a los botones del formulario */
-form .btn {
-  margin-bottom: 1rem;
+  float: right;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Modal */
@@ -898,5 +567,15 @@ form .btn {
 button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+input[type="date"] {
+  background-color: white;
+  text-align: right;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 0.5rem;
+  width: 100%;
+  margin-bottom: 1rem;
 }
 </style>

@@ -40,17 +40,23 @@
           <div class="form-row">
             <label style="flex: 1;">
               Popularidad:
-              <input v-model.number="form.popularidad" type="number" required min="0" />
+              <input v-model.number="form.popularidad" type="number" required min="0" class="form-input-right" />
               <span v-if="errors.popularidad">{{ errors.popularidad }}</span>
             </label>
             <label style="flex: 1;">
+            </label>
+            <label style="flex: 1">
               Activo:
               <input type="checkbox" v-model="form.activo" />
               <span v-if="errors.activo">{{ errors.activo }}</span>
             </label>
+            <label style="flex: 1;">
+            </label>
             <label style="flex: 2;">
               Creación:
               <input type="date" v-model="form.fechaCreacion" required />
+            </label>
+            <label style="flex: 2;">
             </label>
           </div>
           <button type="submit" class="btn submit">{{ editing ? 'Modificar' : 'Crear' }}</button>
@@ -252,6 +258,7 @@ export default {
       formVisible.value = false;
       isProcessing.value = false;
       resetForm();
+      reloadPage();
     };
 
     // Cancelar el modal de borrado
@@ -274,6 +281,11 @@ export default {
     // Cargar las temáticas cuando el componente se monta
     onMounted(fetchTematicas);
 
+    // Método para recargar la página
+    const reloadPage = () => {
+      location.reload();
+    };
+
     return {
       tematicas,
       selectedTematica,
@@ -294,7 +306,8 @@ export default {
       handleSubmit,
       showToast,
       toastVisible,
-      toastMessage
+      toastMessage,
+      reloadPage
     };
   }
 };
@@ -305,7 +318,7 @@ export default {
 .main-container {
   margin-top: 70px;
   display: flex;
-  height: 500px;
+  height: 600px;
   font-family: 'Arial', sans-serif;
   background-color: #f0f0f0;
   /* Color de fondo común */
@@ -373,7 +386,8 @@ li[disabled] {
   display: flex;
   justify-content: space-between;
   margin-bottom: 1rem;
-  width: 100%; /* Asegúrate de que el contenedor ocupe el ancho completo */
+  width: 100%;
+  /* Asegúrate de que el contenedor ocupe el ancho completo */
 }
 
 .btn {
@@ -382,8 +396,10 @@ li[disabled] {
   cursor: pointer;
   border-radius: 5px;
   color: white;
-  flex-grow: 1; /* Permite que los botones se expandan para llenar el espacio disponible */
-  margin: 0 0.5rem; /* Añade un margen entre los botones */
+  flex-grow: 1;
+  /* Permite que los botones se expandan para llenar el espacio disponible */
+  margin: 0 0.5rem;
+  /* Añade un margen entre los botones */
 }
 
 .green {
@@ -391,7 +407,7 @@ li[disabled] {
 }
 
 .gray {
-  background-color: #6c757d;
+  background-color: #5d96c9;
 }
 
 .red {
@@ -403,7 +419,7 @@ li[disabled] {
 }
 
 .cancel {
-  background-color: #6c757d;
+  background-color: #5d96c9;
 }
 
 form {
@@ -434,6 +450,17 @@ textarea {
 /* Añadir margen inferior a los botones del formulario */
 form .btn {
   margin-bottom: 1rem;
+}
+
+.form-input-right {
+  text-align: right;
+  /* Alinea el texto a la derecha */
+  float: right;
+  /* Alinea el elemento a la derecha */
+  width: 100%;
+  /* Asegura que el elemento ocupe todo el ancho disponible */
+  box-sizing: border-box;
+  /* Incluye el padding y el borde en el ancho total del elemento */
 }
 
 /* Modal */
@@ -493,7 +520,7 @@ button:disabled {
 
 input[type="date"] {
   background-color: white;
-  text-align: left;
+  text-align: right;
   border: 1px solid #ddd;
   border-radius: 5px;
   padding: 0.5rem;
