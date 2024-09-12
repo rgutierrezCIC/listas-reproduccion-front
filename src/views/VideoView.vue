@@ -9,7 +9,7 @@
           <p>Duración: {{ video.duracion }} minutos</p>
           <p>Calidad: {{ video.calidad }}</p>
           <p>Clasificación: {{ video.clasificacion }}</p>
-          <p>Fecha de Creación: {{ new Date(video.fechaCreacion).toLocaleDateString() }}</p>
+          <p>Creación: {{ new Date(video.fechaCreacion).toLocaleDateString() }}</p>
           <p>Temática: {{ video.tematica?.nombre }}</p>
         </li>
       </ul>
@@ -70,7 +70,7 @@
               <span v-if="errors.clasificacion">{{ errors.clasificacion }}</span>
             </label>
             <label style="flex: 2;">
-              Fecha de Creación:
+              Creación:
               <input type="date" v-model="form.fechaCreacion" required />
               <span v-if="errors.fechaCreacion">{{ errors.fechaCreacion }}</span>
             </label>
@@ -209,6 +209,10 @@ export default {
 
       try {
         const formData = toRaw(form.value); // Convertir a objeto plano
+        const selectedTematica = tematicas.value.find(t => t.id === formData.tematicaId);
+        formData.tematica = { ...selectedTematica }; // Actualizar el objeto tematica con todos los datos de la temática seleccionada
+        delete formData.tematicaId; // Eliminar el campo tematicaId ya que no es necesario enviarlo
+
         console.log('Datos del formulario:', formData);
         if (editing.value) {
           // Actualizar existente
@@ -257,11 +261,10 @@ export default {
     // Editar
     const startEditing = () => {
       if (selectedVideo.value) {
-        console.log('Calidad del video seleccionado:', selectedVideo.value.calidad); // Verifica el valor de calidad
         form.value = {
           ...selectedVideo.value,
-          tematicaId: selectedVideo.value.tematica?.id,
-          calidad: selectedVideo.value.calidad
+          // calidad: selectedVideo.value.calidad,
+          // tematicaId: selectedVideo.value.tematica?.id
         };
         formVisible.value = true;
         editing.value = true;

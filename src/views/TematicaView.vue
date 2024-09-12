@@ -7,7 +7,7 @@
           @click="!formVisible && !isProcessing && selectTematica(tematica)">
           <strong>{{ tematica.nombre }}</strong> - Popularidad: {{ tematica.popularidad }}
           <p>{{ tematica.descripcion }}</p>
-          <p><em>Fecha de Creación: {{ new Date(tematica.fechaCreacion).toLocaleDateString() }}</em></p>
+          <p><em>Creación: {{ new Date(tematica.fechaCreacion).toLocaleDateString() }}</em></p>
         </li>
       </ul>
     </div>
@@ -49,13 +49,11 @@
               <span v-if="errors.activo">{{ errors.activo }}</span>
             </label>
             <label style="flex: 2;">
-              Fecha de Creación:
+              Creación:
               <input type="date" v-model="form.fechaCreacion" required />
-              <span v-if="errors.fechaCreacion">{{ errors.fechaCreacion }}</span>
             </label>
           </div>
-          <button type="submit" class="btn submit" >{{ editing ? 'Modificar' : 'Crear'
-            }}</button>
+          <button type="submit" class="btn submit">{{ editing ? 'Modificar' : 'Crear' }}</button>
           <button type="button" @click="cancelForm" class="btn cancel">Cancelar</button>
         </form>
       </div>
@@ -65,9 +63,9 @@
     <div v-if="showDeleteModal" class="modal-backdrop">
       <div class="modal">
         <p v-if="deleteError">{{ deleteError }}</p>
-        <p v-else>¿Estás seguro de que deseas borrar esta temática?</p>
+        <p v-else>¿Estás seguro de que deseas borrar la temática "{{ selectedTematica.nombre }}"?</p>
         <button v-if="!deleteError" @click="deleteTematica" class="btn red">Confirmar</button>
-        <button @click="cancelDelete" class="btn cancel">Cancelar</button>
+        <button @click="cancelDelete" class="btn cancel">{{ deleteError ? 'Cerrar' : 'Cancelar' }}</button>
       </div>
     </div>
 
@@ -159,12 +157,12 @@ export default {
           await axios.post(`/api/tematicas`, form.value);
           const index = tematicas.value.findIndex(t => t.id === selectedTematica.value.id);
           tematicas.value[index] = { ...form.value, id: selectedTematica.value.id };
-          showToast('Temática actualizada exitosamente.');
+          showToast(`Temática "${form.value.nombre}" actualizada exitosamente.`);
         } else {
           // Crear nuevo
           const response = await axios.post('/api/tematicas', form.value);
           tematicas.value.push(response.data);
-          showToast('Temática creada exitosamente.');
+          showToast(`Temática "${form.value.nombre}" creada exitosamente.`);
         }
         cancelForm();
       } catch (error) {
@@ -220,7 +218,7 @@ export default {
 
         // Verificar si hay videos asociados con la temática
         if (response.data.length > 0) {
-          deleteError.value = 'No se puede borrar la temática porque tiene vídeos asociados.';
+          deleteError.value = `No se puede borrar la temática "${selectedTematica.value.nombre}" porque tiene vídeos asociados.`;
         } else {
           deleteError.value = null;
         }
@@ -239,8 +237,8 @@ export default {
         if (selectedTematica.value) {
           await axios.delete(`/api/tematicas/${selectedTematica.value.id}`);
           tematicas.value = tematicas.value.filter(t => t.id !== selectedTematica.value.id);
+          showToast(`Temática "${selectedTematica.value.nombre}" eliminada exitosamente.`);
           selectedTematica.value = null;
-          showToast('Temática eliminada exitosamente.');
         }
       } catch (error) {
         console.error('Error al eliminar la temática:', error);
