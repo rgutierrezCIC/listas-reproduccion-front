@@ -32,18 +32,18 @@
         <form @submit.prevent="handleSubmit">
           <label>
             Título:
-            <input v-model="form.titulo" type="text" required />
+            <input v-model="form.titulo" type="text" required data-cy="titulo"/>
             <span v-if="errors.titulo">{{ errors.titulo }}</span>
           </label>
           <div class="form-row">
             <label style="flex: 3;">
               Autor:
-              <input v-model="form.autor" type="text" required />
+              <input v-model="form.autor" type="text" required data-cy="autor"/>
               <span v-if="errors.autor">{{ errors.autor }}</span>
             </label>
             <label style="flex: 1;">
               Temática:
-              <select v-model="form.tematicaId" required class="form-input-left">
+              <select v-model="form.tematicaId" required class="form-input-left" data-cy="tematicaId">
                 <option v-for="tematica in tematicas" :key="tematica.id" :value="tematica.id">
                   {{ tematica.nombre }}
                 </option>
@@ -54,14 +54,14 @@
           <div class="form-row2">
             <label style="flex: 6;">
               Duración (m):
-              <input v-model.number="form.duracion" type="number" required min="1" class="form-input-right" />
+              <input v-model.number="form.duracion" type="number" required min="1" class="form-input-right" data-cy="duracion"/>
               <span v-if="errors.duracion">{{ errors.duracion }}</span>
             </label>
             <label style="flex: 1;">
             </label>
             <label style="flex: 4;">
               Calidad:
-              <select v-model="form.calidad" required class="form-input-right">
+              <select v-model="form.calidad" required class="form-input-right" data-cy="calidad">
                 <option v-for="calidad in calidadOptions" :key="calidad" :value="calidad">
                   {{ calidad }}
                 </option>
@@ -72,7 +72,7 @@
             </label>
             <label style="flex: 4;">
               Clasificación:
-              <select v-model="form.clasificacion" required class="form-input-right">
+              <select v-model="form.clasificacion" required class="form-input-right" data-cy="clasificacion">
                 <option v-for="clasificacion in clasificacionOptions" :key="clasificacion" :value="clasificacion">
                   {{ clasificacion }}
                 </option>
@@ -83,11 +83,11 @@
             </label>
             <label style="flex: 4;">
               Fecha de Creación:
-              <input v-model="form.fechaCreacion" type="date" required />
+              <input v-model="form.fechaCreacion" type="date" required data-cy="fechaCreacion"/>
               <span v-if="errors.fechaCreacion">{{ errors.fechaCreacion }}</span>
             </label>
           </div>
-          <button type="submit" class="btn submit">{{ editing ? 'Modificar' : 'Crear' }}</button>
+          <button type="submit" class="btn submit" data-cy="submit">{{ editing ? 'Modificar' : 'Crear' }}</button>
           <button type="button" @click="cancelForm" class="btn cancel">Cancelar</button>
         </form>
       </div>

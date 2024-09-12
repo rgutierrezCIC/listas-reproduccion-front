@@ -29,38 +29,38 @@
         <form @submit.prevent="handleSubmit">
           <label>
             Nombre:
-            <input v-model="form.nombre" type="text" required />
+            <input v-model="form.nombre" type="text" required data-cy="nombre"/>
             <span v-if="errors.nombre">{{ errors.nombre }}</span>
           </label>
           <label>
             Descripción:
-            <textarea v-model="form.descripcion" required></textarea>
+            <textarea v-model="form.descripcion" required data-cy="descripcion"></textarea>
             <span v-if="errors.descripcion">{{ errors.descripcion }}</span>
           </label>
           <div class="form-row">
             <label style="flex: 1;">
               Popularidad:
-              <input v-model.number="form.popularidad" type="number" required min="0" class="form-input-right" />
+              <input v-model.number="form.popularidad" type="number" required min="0" class="form-input-right" data-cy="popularidad"/>
               <span v-if="errors.popularidad">{{ errors.popularidad }}</span>
             </label>
             <label style="flex: 1;">
             </label>
             <label style="flex: 1">
               Activo:
-              <input type="checkbox" v-model="form.activo" />
+              <input type="checkbox" v-model="form.activo"  data-cy="activo"/>
               <span v-if="errors.activo">{{ errors.activo }}</span>
             </label>
             <label style="flex: 1;">
             </label>
             <label style="flex: 2;">
               Creación:
-              <input type="date" v-model="form.fechaCreacion" required />
+              <input type="date" v-model="form.fechaCreacion" required  data-cy="fechaCreacion"/>
             </label>
             <label style="flex: 2;">
             </label>
           </div>
-          <button type="submit" class="btn submit">{{ editing ? 'Modificar' : 'Crear' }}</button>
-          <button type="button" @click="cancelForm" class="btn cancel">Cancelar</button>
+          <button type="submit" class="btn submit" data-cy="submit">{{ editing ? 'Modificar' : 'Crear' }}</button>
+          <button type="button" @click="cancelForm" class="btn cancel" data-cy="cancel">Cancelar</button>
         </form>
       </div>
     </div>

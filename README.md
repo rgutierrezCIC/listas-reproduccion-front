@@ -29,3 +29,5 @@
 - No está implementado lo de la popularidad, los videos no son los que marcan la popularidad de cada temática. ```FUERA DE ALCANCE```
 
 - Tooltips. ```FUERA DE ALCANCE```
+
+- Implementación del selector de activo como filtro para las temáticas que se muestran al crear video. ```FUERA DE ALCANCE```
