@@ -1,6 +1,6 @@
 <template>
   <div class="inicio">
-    <h1>Bienvenido a Listas de Reproducción</h1>
+    <h1>Bienvenido</h1>
     <p>Explora, crea y modifica tus listas por Temática y añade tus vídeos favoritos.</p>
     <div class="links">
       <router-link to="/tematica" class="btn">Temáticas</router-link>
